@@ -15,11 +15,11 @@ namespace WebAPIAssessment.Controllers
     [ApiController]
     public class FormsController : ControllerBase
     {
-        private readonly AssessmentDbContext FormContext;
+        private readonly AssessmentDbContext PasDbContext;
 
-        public FormsController(AssessmentDbContext context)
+        public FormsController(AssessmentDbContext pasdbcontext)
         {
-            FormContext = context;
+            this.PasDbContext = pasdbcontext;
         }
 
         // GET: api/Forms
@@ -29,7 +29,7 @@ namespace WebAPIAssessment.Controllers
         {
             try
             {
-                var form =  await FormContext.Forms.ToListAsync();
+                var form =  await PasDbContext.Forms.ToListAsync();
                 if (form.Count == 0)
                 {
                     return NotFound($" Form not found");
@@ -50,7 +50,7 @@ namespace WebAPIAssessment.Controllers
         {
             try
             {
-                var form = await FormContext.Forms.FindAsync(Id);
+                var form = await PasDbContext.Forms.FindAsync(Id);
 
                 if (form == null)
                 {

@@ -15,15 +15,11 @@ namespace WebAPIAssessment.Controllers
     [ApiController]
     public class FieldsController : ControllerBase
     {
-        private readonly AssessmentDbContext FieldContext;
-        private readonly AssessmentDbContext FormContext;
-        private readonly AssessmentDbContext AocolumnContext;
+        private readonly AssessmentDbContext PasDbContext;
 
-        public FieldsController(AssessmentDbContext context, AssessmentDbContext formContext, AssessmentDbContext aocolumnContext)
+        public FieldsController(AssessmentDbContext pasdbcontext)
         {
-            FieldContext = context;
-            FormContext = formContext;
-            AocolumnContext = aocolumnContext;
+            this.PasDbContext = pasdbcontext;
         }
         // Get all records of field by Type
         // GET: api/Field/type/{type}
@@ -33,7 +29,7 @@ namespace WebAPIAssessment.Controllers
         {
             try
             {
-                var fields = await FieldContext.Fields.Where(x => x.Type == type).ToListAsync();
+                var fields = await PasDbContext.Fields.Where(x => x.Type == type).ToListAsync();
                 if (fields.Count == 0)
                 {
                     return NotFound($" Fields with type '{type}' was not found");
@@ -55,7 +51,7 @@ namespace WebAPIAssessment.Controllers
         {
             try
             {
-                var forms = await FormContext.Forms.Where(f => f.Name == FormName).ToListAsync();
+                var forms = await PasDbContext.Forms.Where(f => f.Name == FormName).ToListAsync();
                 if (forms.Count == 0)
                 {
                     return NotFound($" Form with Name '{FormName}' was not found");
@@ -64,7 +60,7 @@ namespace WebAPIAssessment.Controllers
 
                 foreach (var form in forms)
                 {
-                    var fields = await FieldContext.Fields.Where(x => x.FormId == form.Id).ToListAsync();
+                    var fields = await PasDbContext.Fields.Where(x => x.FormId == form.Id).ToListAsync();
 
                     AllFields.AddRange(fields);
                 }
@@ -90,18 +86,18 @@ namespace WebAPIAssessment.Controllers
         {
             try
             {
-                var form = await FormContext.Forms.FirstOrDefaultAsync(f => f.Id == FormId);
+                var form = await PasDbContext.Forms.FirstOrDefaultAsync(f => f.Id == FormId);
                 if (form == null)
                 {
                     return NotFound($" Form with Form Id '{FormId}' was not found");
                 }
-                var fields = await FieldContext.Fields.Include("Form").Where(x => x.FormId == FormId).ToListAsync();
+                var fields = await PasDbContext.Fields.Include("Form").Where(x => x.FormId == FormId).ToListAsync();
                 if (fields.Any())
                 {
                     var response = fields.Select(field => new
                     {
                         Field = field,
-                      //  FormName = form.Name
+                        FormName = form.Name
                     }).ToList();
 
                     return Ok(response);
@@ -123,7 +119,7 @@ namespace WebAPIAssessment.Controllers
         {
             try
             {
-                var existingField = await FieldContext.Fields.FindAsync(FieldId);
+                var existingField = await PasDbContext.Fields.FindAsync(FieldId);
 
                 if (existingField != null)
                 {
@@ -160,7 +156,7 @@ namespace WebAPIAssessment.Controllers
                     existingField.TextDisplaySize = updatedField.TextDisplaySize ?? existingField.TextDisplaySize;
                     existingField.LinkText = updatedField.LinkText ?? existingField.LinkText;
                     existingField.AuditViewOnly = updatedField.AuditViewOnly ?? existingField.AuditViewOnly;
-                    await FieldContext.SaveChangesAsync();
+                    await PasDbContext.SaveChangesAsync();
                     return Ok(existingField);
                 }
                 return NotFound($"Field with Id '{FieldId}' was not found.");
@@ -180,28 +176,16 @@ namespace WebAPIAssessment.Controllers
 
             try
             {
-                var Form = await FormContext.Forms.FirstOrDefaultAsync(f => f.Name == FormName);
+                var Form = await PasDbContext.Forms.FirstOrDefaultAsync(f => f.Name == FormName);
 
                 if (Form == null)
                 {
                     return NotFound($" Form with Name '{FormName}' was not found");
                 }
-                if (NewField.ColumnId == null)
-                {
-                    return BadRequest("ColumnId is required");
-                }
-                var Column = await AocolumnContext.Aocolumns.FirstOrDefaultAsync(c => c.Id == NewField.ColumnId);
-
-                if (Column == null)
-                {
-                    return NotFound($" ColumnId '{NewField.ColumnId}' was not found");
-                }
-
                 NewField.Id = Guid.NewGuid();
                 NewField.FormId = Form.Id;
-                NewField.ColumnId = Column.Id;
-                await FieldContext.Fields.AddAsync(NewField);
-                await FieldContext.SaveChangesAsync();
+                await PasDbContext.Fields.AddAsync(NewField);
+                await PasDbContext.SaveChangesAsync();
                 return Ok(NewField);
             }
             catch
@@ -220,11 +204,11 @@ namespace WebAPIAssessment.Controllers
         {
             try
             {
-                var field = await FieldContext.Fields.FindAsync(FieldId);
+                var field = await PasDbContext.Fields.FindAsync(FieldId);
                 if (field != null)
                 {
-                    FieldContext.Fields.Remove(field);
-                    await FieldContext.SaveChangesAsync();
+                    PasDbContext.Fields.Remove(field);
+                    await PasDbContext.SaveChangesAsync();
 
                     return Ok(field);
                 }

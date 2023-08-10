@@ -15,11 +15,11 @@ namespace WebAPIAssessment.Controllers
     [ApiController]
     public class AocolumnsController : ControllerBase
     {
-        private readonly AssessmentDbContext AocolumnContext;
+        private readonly AssessmentDbContext PasDbContext;
 
-        public AocolumnsController(AssessmentDbContext context)
+        public AocolumnsController(AssessmentDbContext pasdbcontext)
         {
-            AocolumnContext = context;
+            this.PasDbContext = pasdbcontext;
         }
 
         // GET: api/Columns
@@ -30,7 +30,7 @@ namespace WebAPIAssessment.Controllers
 
             try
             {
-                var form = await AocolumnContext.Aocolumns.ToListAsync();
+                var form = await PasDbContext.Aocolumns.ToListAsync();
                 if (form.Count == 0)
                 {
                     return NotFound($" Column not found");
@@ -51,7 +51,7 @@ namespace WebAPIAssessment.Controllers
         {
             try
             {
-                var aocolumn = await AocolumnContext.Aocolumns.FindAsync(Id);
+                var aocolumn = await PasDbContext.Aocolumns.FindAsync(Id);
 
                 if (aocolumn == null)
                 {
