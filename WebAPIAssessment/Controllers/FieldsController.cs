@@ -94,11 +94,11 @@ namespace WebAPIAssessment.Controllers
                 var fields = await PasDbContext.Fields.Include("Form").Where(x => x.FormId == FormId).ToListAsync();
                 if (fields.Any())
                 {
-                    var response = fields.Select(field => new
+                    var response = new
                     {
-                        Field = field,
+                        fields,
                         FormName = form.Name
-                    }).ToList();
+                    };
 
                     return Ok(response);
                 }
